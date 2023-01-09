@@ -1,5 +1,6 @@
 import Foundation
 import Capacitor
+import SwiftUI
 
 /**
  * Please read the Capacitor iOS Plugin Development Guide
@@ -22,17 +23,20 @@ public class FilePreviewPlugin: CAPPlugin {
             call.reject("Must provide a valid URL to open")
             return
         }
-        Task(priority: .background) {
+        Task {
             do {
                 let fileUrl = try await implementation.downloadFile(url)
                 
                 //let data = try implementation.urlToData(fileUrl)
               
                 DispatchQueue.main.async {
-                    var controller = FilePreviewController()
-                    controller.url = fileUrl
-                    self.bridge?.viewController?.present(controller, animated: true, completion: nil)
-                }
+                    // var controller = FilePreviewController()
+                    // controller.url = fileUrl
+                    // self.bridge?.viewController?.present(controller, animated: true, completion: nil)
+                    
+                    let swiftUIViewController = UIHostingController(rootView: PreView(url: url, dismissAction: self.dismissAction))
+                    self.bridge?.viewController?.present(swiftUIViewController, animated: true)
+                }   
                 
                 call.resolve([
                     "path": implementation.echo(fileUrl.description),
@@ -46,34 +50,9 @@ public class FilePreviewPlugin: CAPPlugin {
         }
 
     }
-}
-
-import PDFKit
-import SwiftUI
-
-struct PDFKitRepresentedView: UIViewRepresentable {
-    typealias UIViewType = PDFView
     
-    let data: Data
-    let singlePage: Bool
-    
-    init(_ data: Data, singlePage: Bool = false) {
-        self.data = data
-        self.singlePage = singlePage
-    }
-    
-    func makeUIView(context _: UIViewRepresentableContext<PDFKitRepresentedView>) -> UIViewType {
-        // Create a `PDFView` and set its `PDFDocument`.
-        let pdfView = PDFView()
-        pdfView.document = PDFDocument(data: data)
-        pdfView.autoScales = true
-        if singlePage {
-            pdfView.displayMode = .singlePage
-        }
-        return pdfView
-    }
-    
-    func updateUIView(_ pdfView: UIViewType, context _: UIViewRepresentableContext<PDFKitRepresentedView>) {
-        pdfView.document = PDFDocument(data: data)
+    @objc func dismissAction() {
+        self.bridge?.viewController?.dismiss(animated: true)
     }
 }
+
