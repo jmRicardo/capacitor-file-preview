@@ -26,12 +26,14 @@ struct PreView: View {
             NavigationView {
                 HStack {
                     if let imageSrc = image {
+                        
                         Image(uiImage: imageSrc)
                             .resizable()
                             .scaledToFit()
                             .zoomable(scale: $scale)
                     } else {
                         ImagePreview(url: url)
+                            .zoomable(scale: $scale)
                     }
                 }
                 // padding()

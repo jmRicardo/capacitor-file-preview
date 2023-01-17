@@ -2,13 +2,7 @@ import Foundation
 import PDFKit
 
 @objc public class FilePreview: NSObject {
-
     
-    @objc public func echo(_ value: String) -> String {
-        print(value)
-        return value
-    }
-      
     func download(_ url: URL,completion: @escaping (_ success: Bool,_ fileLocation: URL? , _ callback : NSError?) -> Void){
         let downloadTask = URLSession.shared.downloadTask(with: url, completionHandler: { (location, response, error) -> Void in
             guard let fileURL = location else { return }
