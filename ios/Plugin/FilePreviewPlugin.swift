@@ -9,7 +9,8 @@ import SwiftUI
 @objc(FilePreviewPlugin)
 public class FilePreviewPlugin: CAPPlugin {
     private let implementation = FilePreview()
-  
+    private let validFormats = ["pdf","jpg","png","gif"]
+
     @objc func openFile(_ call: CAPPluginCall) {
         
         // validate the URL
@@ -18,21 +19,22 @@ public class FilePreviewPlugin: CAPPlugin {
             return
         }
         
+        // validate the format
+        guard validFormats.contains(url.pathExtension) else {
+            call.reject("\(url.pathExtension) format not supported.")
+            return
+        }
+        
         Task {
-            do {
+
                 DispatchQueue.main.async {
                     let swiftUIViewController = UIHostingController(rootView: PreviewWithPDFKit(url: url, dismissAction: self.dismissAction))
-                    self.bridge?.viewController?.present(swiftUIViewController, animated: true)
+                    self.bridge?.viewController?.present(swiftUIViewController, animated: false)
                 }
                 call.resolve([
-                    "path": implementation.echo(urlString.description),
+                    "path": urlString.description,
                     //"mimeType": implementation.echo(data.description)
                 ])
-            }catch{
-                call.resolve([
-                    "path": implementation.echo("ERROR")
-                ])
-            }
         }
 
     }
